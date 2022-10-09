@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{39B83BC8-426A-E38D-2931-E58CFDFF6781}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "BloodMoon",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
