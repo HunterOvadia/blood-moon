@@ -10,5 +10,6 @@ public class BloodMoonTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		ExtraModuleNames.Add("BloodMoon");
+		bWithPushModel = true;
 	}
 }

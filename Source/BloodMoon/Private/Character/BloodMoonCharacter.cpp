@@ -31,8 +31,20 @@ ABloodMoonCharacter::ABloodMoonCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
 	
 	TurnRateGamepad = 50.f;
+}
+
+void ABloodMoonCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(HasAuthority() && IsValid(StatsComponent))
+	{
+		StatsComponent->AddStat(EStatsType::Health, 100);
+	}
 }
 
 void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -40,6 +52,7 @@ void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("DebugFunction", IE_Pressed, this, &ABloodMoonCharacter::DebugFunction);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ABloodMoonCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &ABloodMoonCharacter::MoveRight);
@@ -57,6 +70,14 @@ void ABloodMoonCharacter::TurnAtRate(float Rate)
 void ABloodMoonCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void ABloodMoonCharacter::DebugFunction()
+{
+	if(IsValid(StatsComponent))
+	{
+		StatsComponent->ServerUpdateStat(EStatsType::Health, -5);
+	}
 }
 
 void ABloodMoonCharacter::MoveForward(float Value)

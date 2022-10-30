@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "Components/StatsComponent.h"
 #include "GameFramework/Character.h"
 #include "BloodMoonCharacter.generated.h"
 
@@ -15,11 +16,15 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
+
+private:
+	void DebugFunction();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
@@ -31,5 +36,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BloodMoon, meta = (AllowPrivateAccess = "true"))
+	UStatsComponent* StatsComponent;
 };
 
