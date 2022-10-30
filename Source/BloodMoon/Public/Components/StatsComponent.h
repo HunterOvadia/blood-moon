@@ -8,6 +8,7 @@ UENUM()
 enum class EStatsType : uint8
 {
 	Health,
+	Hunger
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStatChangedSignature, EStatsType, Type, int32, NewValue);
@@ -104,9 +105,6 @@ public:
 	bool GetStatEntry(EStatsType Stat, FStatsFastArrayEntry*& OutStat) const;
 	void SetStat(EStatsType Stat, int32 NewValue);
 	void UpdateStat(EStatsType Stat, int32 Offset);
-
-	UFUNCTION(Server, Reliable)
-	void ServerUpdateStat(EStatsType Stat, int32 Offset);
 
 public:
 	FOnStatChangedSignature OnStatChanged;

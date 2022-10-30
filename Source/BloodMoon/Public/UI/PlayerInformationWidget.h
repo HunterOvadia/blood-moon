@@ -17,4 +17,7 @@ class BLOODMOON_API UPlayerInformationWidget : public UUserWidget
 public:
 	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	UStatDisplayWidget* HealthDisplayWidget;
+
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UStatDisplayWidget* HungerDisplayWidget;
 };

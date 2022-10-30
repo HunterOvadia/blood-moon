@@ -17,14 +17,17 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
 private:
-	void DebugFunction();
+	bool TickHunger(float DeltaTime);
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
@@ -39,5 +42,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BloodMoon, meta = (AllowPrivateAccess = "true"))
 	UStatsComponent* StatsComponent;
+
+private:
+	FTSTicker::FDelegateHandle HungerTickHandle;
 };
 

@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StatsComponent.h"
+#include "Engine/ActorChannel.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -45,7 +46,20 @@ void ABloodMoonCharacter::BeginPlay()
 	if(HasAuthority() && IsValid(StatsComponent))
 	{
 		StatsComponent->AddStat(EStatsType::Health, 100);
+		StatsComponent->AddStat(EStatsType::Hunger, 100);
+
+		HungerTickHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateUObject(this, &ABloodMoonCharacter::TickHunger), 10.0f);
 	}
+}
+
+void ABloodMoonCharacter::BeginDestroy()
+{
+	if(HungerTickHandle.IsValid())
+	{
+		FTSTicker::GetCoreTicker().RemoveTicker(HungerTickHandle);
+	}
+	
+	Super::BeginDestroy();
 }
 
 void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -53,7 +67,6 @@ void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("DebugFunction", IE_Pressed, this, &ABloodMoonCharacter::DebugFunction);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ABloodMoonCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &ABloodMoonCharacter::MoveRight);
@@ -61,6 +74,34 @@ void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAxis("Turn Right / Left Gamepad", this, &ABloodMoonCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &ABloodMoonCharacter::LookUpAtRate);
+}
+
+bool ABloodMoonCharacter::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	check(Channel);
+	check(Bunch);
+	check(RepFlags);
+
+	bool bWroteSomething = false;
+	for(UActorComponent* ActorComponent : ReplicatedComponents)
+	{
+		UReplicationKeyActorComponent* RepKeyActorComponent = Cast<UReplicationKeyActorComponent>(ActorComponent);
+		if(RepKeyActorComponent!= nullptr)
+		{
+			if(Channel->KeyNeedsToReplicate(RepKeyActorComponent->GetUniqueID(), RepKeyActorComponent->GetReplicationKey()))
+			{
+				bWroteSomething |= RepKeyActorComponent->ReplicateSubobjects(Channel, Bunch, RepFlags);
+				bWroteSomething |= Channel->ReplicateSubobject(RepKeyActorComponent, *Bunch, *RepFlags);
+			}
+		}
+		else
+		{
+			bWroteSomething |= ActorComponent->ReplicateSubobjects(Channel, Bunch, RepFlags);
+			bWroteSomething |= Channel->ReplicateSubobject(ActorComponent, *Bunch, *RepFlags);
+		}
+	}
+
+	return bWroteSomething;
 }
 
 void ABloodMoonCharacter::TurnAtRate(float Rate)
@@ -73,12 +114,19 @@ void ABloodMoonCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
-void ABloodMoonCharacter::DebugFunction()
+bool ABloodMoonCharacter::TickHunger(float DeltaTime)
 {
+	if(!HasAuthority())
+	{
+		return true;
+	}
+	
 	if(IsValid(StatsComponent))
 	{
-		StatsComponent->ServerUpdateStat(EStatsType::Health, -5);
+		StatsComponent->UpdateStat(EStatsType::Hunger, -1);
 	}
+	
+	return true;
 }
 
 void ABloodMoonCharacter::MoveForward(float Value)

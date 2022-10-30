@@ -1,4 +1,6 @@
 ﻿#include "Components/StatsComponent.h"
+
+#include "BloodMoon/BloodMoon.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -81,6 +83,7 @@ bool UStatsComponent::GetStatEntry(const EStatsType Stat, FStatsFastArrayEntry*&
 		return true;
 	}
 
+	UE_LOG(LogBloodMoon, Warning, TEXT("GetStatEntry: %s tried to get stat '%i' that is not valid on the object."), *GetName(), static_cast<int>(Stat)); 
 	return false;
 }
 
@@ -130,9 +133,3 @@ void UStatsComponent::UpdateStat(const EStatsType Stat, const int32 Offset)
 		OnStatChanged.Broadcast(Stat, Entry->Value);
 	}
 }
-
-void UStatsComponent::ServerUpdateStat_Implementation(EStatsType Stat, int32 Offset)
-{
-	UpdateStat(Stat, Offset);
-}
-
