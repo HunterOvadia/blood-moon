@@ -4,14 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UObject/Object.h"
 #include "PlayerInformationWidget.generated.h"
 
-/**
- * 
- */
+
+class UStatDisplayWidget;
+
 UCLASS()
 class BLOODMOON_API UPlayerInformationWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UStatDisplayWidget* HealthDisplayWidget;
 };

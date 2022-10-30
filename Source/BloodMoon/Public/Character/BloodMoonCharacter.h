@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "CoreMinimal.h"
-#include "Components/StatsComponent.h"
 #include "GameFramework/Character.h"
 #include "BloodMoonCharacter.generated.h"
 
@@ -14,6 +13,7 @@ public:
 	ABloodMoonCharacter();
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class UStatsComponent* GetStatsComponent() const { return StatsComponent; }
 
 protected:
 	virtual void BeginPlay() override;

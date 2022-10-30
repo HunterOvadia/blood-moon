@@ -6,11 +6,13 @@ void FStatsFastArrayEntry::PostReplicatedAdd(const FStatsFastArray& InArray)
 {
 	FStatsFastArray& Array = const_cast<FStatsFastArray&>(InArray);
 	Array.StatsMap.Add(Type, this);
+	Array.OwningComponent->OnStatChanged.Broadcast(Type, Value);
 }
 
 void FStatsFastArrayEntry::PostReplicatedChange(const FStatsFastArray& InArray)
 {
-
+	const FStatsFastArray& Array = const_cast<FStatsFastArray&>(InArray);
+	Array.OwningComponent->OnStatChanged.Broadcast(Type, Value);
 }
 
 void FStatsFastArrayEntry::PreReplicatedRemove(const FStatsFastArray& InArray)
@@ -22,6 +24,7 @@ void FStatsFastArrayEntry::PreReplicatedRemove(const FStatsFastArray& InArray)
 UStatsComponent::UStatsComponent()
 {
 	SetIsReplicatedByDefault(true);
+	Stats.OwningComponent = this;
 }
 
 void UStatsComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -42,6 +45,8 @@ void UStatsComponent::AddStat(const EStatsType Type, const int32 Default)
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(UStatsComponent, Stats, this);
 		MarkDirtyForReplication();
+
+		OnStatChanged.Broadcast(Type, Default);
 	}
 }
 
@@ -102,6 +107,8 @@ void UStatsComponent::SetStat(const EStatsType Stat, const int32 NewValue)
 			MARK_PROPERTY_DIRTY_FROM_NAME(UStatsComponent, Stats, this);
 			MarkDirtyForReplication();
 		}
+
+		OnStatChanged.Broadcast(Stat, Entry->Value);
 	}
 }
 
@@ -119,6 +126,8 @@ void UStatsComponent::UpdateStat(const EStatsType Stat, const int32 Offset)
 			MARK_PROPERTY_DIRTY_FROM_NAME(UStatsComponent, Stats, this);
 			MarkDirtyForReplication();
 		}
+
+		OnStatChanged.Broadcast(Stat, Entry->Value);
 	}
 }
 

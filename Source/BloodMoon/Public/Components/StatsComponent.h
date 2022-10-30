@@ -10,6 +10,8 @@ enum class EStatsType : uint8
 	Health,
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStatChangedSignature, EStatsType, Type, int32, NewValue);
+
 struct FStatsFastArray;
 class UStatsComponent;
 
@@ -72,6 +74,9 @@ public:
 	UPROPERTY()
 	TArray<FStatsFastArrayEntry> Items;
 	TMap<EStatsType, FStatsFastArrayEntry*> StatsMap;
+
+	UPROPERTY()
+	UStatsComponent* OwningComponent;
 };
 
 template<>
@@ -102,6 +107,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerUpdateStat(EStatsType Stat, int32 Offset);
+
+public:
+	FOnStatChangedSignature OnStatChanged;
 	
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
