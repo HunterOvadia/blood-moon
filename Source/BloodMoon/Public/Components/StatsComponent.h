@@ -90,9 +90,13 @@ class BLOODMOON_API UStatsComponent : public UReplicationKeyActorComponent
 
 public:
 	UStatsComponent();
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetStatValue(EStatsType Stat) const;
+	
 	void AddStat(EStatsType Type, int32 Default = 0);
 	void RemoveStat(EStatsType Type);
-	bool GetStat(EStatsType Stat, FStatsFastArrayEntry*& OutStat) const;
+	bool GetStatEntry(EStatsType Stat, FStatsFastArrayEntry*& OutStat) const;
 	void SetStat(EStatsType Stat, int32 NewValue);
 	void UpdateStat(EStatsType Stat, int32 Offset);
 

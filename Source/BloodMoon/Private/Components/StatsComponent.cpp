@@ -67,7 +67,7 @@ void UStatsComponent::RemoveStat(const EStatsType Type)
 	}
 }
 
-bool UStatsComponent::GetStat(const EStatsType Stat, FStatsFastArrayEntry*& OutStat) const
+bool UStatsComponent::GetStatEntry(const EStatsType Stat, FStatsFastArrayEntry*& OutStat) const
 {
 	FStatsFastArrayEntry* Found = Stats.StatsMap.FindRef(Stat);
 	if(Found)
@@ -79,10 +79,21 @@ bool UStatsComponent::GetStat(const EStatsType Stat, FStatsFastArrayEntry*& OutS
 	return false;
 }
 
+int32 UStatsComponent::GetStatValue(EStatsType Stat) const
+{
+	FStatsFastArrayEntry* Entry;
+	if(GetStatEntry(Stat, Entry))
+	{
+		return Entry->Value;
+	}
+
+	return 0;
+}
+
 void UStatsComponent::SetStat(const EStatsType Stat, const int32 NewValue)
 {
 	FStatsFastArrayEntry* Entry;
-	if(GetStat(Stat, Entry))
+	if(GetStatEntry(Stat, Entry))
 	{
 		Entry->Value = NewValue;
 		if(GetOwner()->HasAuthority())
@@ -97,9 +108,11 @@ void UStatsComponent::SetStat(const EStatsType Stat, const int32 NewValue)
 void UStatsComponent::UpdateStat(const EStatsType Stat, const int32 Offset)
 {
 	FStatsFastArrayEntry* Entry;
-	if(GetStat(Stat, Entry))
+	if(GetStatEntry(Stat, Entry))
 	{
 		Entry->Value += Offset;
+		Entry->Value = FMath::Clamp(Entry->Value, 0, 100);
+
 		if(GetOwner()->HasAuthority())
 		{
 			Stats.MarkItemDirty(*Entry);
