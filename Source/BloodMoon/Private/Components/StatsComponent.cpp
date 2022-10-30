@@ -1,8 +1,6 @@
 ﻿#include "Components/StatsComponent.h"
-
 #include "BloodMoon/BloodMoon.h"
 #include "Net/UnrealNetwork.h"
-
 
 void FStatsFastArrayEntry::PostReplicatedAdd(const FStatsFastArray& InArray)
 {
