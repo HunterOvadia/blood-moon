@@ -3,6 +3,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/InteractionComponent.h"
 #include "Components/StatsComponent.h"
 #include "Engine/ActorChannel.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,6 +36,9 @@ ABloodMoonCharacter::ABloodMoonCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
+
+	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	InteractionComponent->InteractionDistance = 100.0f;
 	
 	TurnRateGamepad = 50.f;
 }
@@ -43,22 +47,46 @@ void ABloodMoonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(HasAuthority() && IsValid(StatsComponent))
+	if(HasAuthority())
 	{
 		StatsComponent->AddStat(EStatsType::Health, 100);
 		StatsComponent->AddStat(EStatsType::Hunger, 100);
-
 		HungerTickHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateUObject(this, &ABloodMoonCharacter::TickHunger), 10.0f);
+	}
+	else
+	{
+		if(const APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			if(AHUD* HUD = PC->GetHUD())
+			{
+				PlayerHUD = Cast<APlayerHUD>(HUD);
+			}
+		}
+		
+		if(IsValid(InteractionComponent))
+		{
+			InteractionComponent->OnHoveredNewInteractable.AddDynamic(this, &ThisClass::OnHoveredNewInteractable);
+		}
 	}
 }
 
 void ABloodMoonCharacter::BeginDestroy()
 {
-	if(HungerTickHandle.IsValid())
+	if(HasAuthority())
 	{
-		FTSTicker::GetCoreTicker().RemoveTicker(HungerTickHandle);
+		if(HungerTickHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(HungerTickHandle);
+		}
 	}
-	
+	else
+	{
+		if(IsValid(InteractionComponent))
+		{
+			InteractionComponent->OnHoveredNewInteractable.RemoveDynamic(this, &ThisClass::ABloodMoonCharacter::OnHoveredNewInteractable);
+		}
+	}
+
 	Super::BeginDestroy();
 }
 
@@ -67,6 +95,7 @@ void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ABloodMoonCharacter::OnInteract);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ABloodMoonCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &ABloodMoonCharacter::MoveRight);
@@ -75,6 +104,7 @@ void ABloodMoonCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Look Up / Down Gamepad", this, &ABloodMoonCharacter::LookUpAtRate);
 }
+
 
 bool ABloodMoonCharacter::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
@@ -104,6 +134,11 @@ bool ABloodMoonCharacter::ReplicateSubobjects(UActorChannel* Channel, FOutBunch*
 	return bWroteSomething;
 }
 
+void ABloodMoonCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+
 void ABloodMoonCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
@@ -127,6 +162,22 @@ bool ABloodMoonCharacter::TickHunger(float DeltaTime)
 	}
 	
 	return true;
+}
+
+void ABloodMoonCharacter::OnInteract()
+{
+	if(IsValid(InteractionComponent))
+	{
+		InteractionComponent->Interact();
+	}
+}
+
+void ABloodMoonCharacter::OnHoveredNewInteractable(AInteractableActor* NewInteractable)
+{
+	if(IsValid(PlayerHUD))
+	{
+		PlayerHUD->OnHoveredNewInteractable(NewInteractable);
+	}
 }
 
 void ABloodMoonCharacter::MoveForward(float Value)
