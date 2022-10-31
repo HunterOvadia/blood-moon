@@ -16,12 +16,11 @@ void UInteractionComponent::Interact()
 	}
 }
 
-void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	AActor* Owner = GetOwner();
+	const AActor* Owner = GetOwner();
 	if(!IsValid(Owner))
 	{
 		return;

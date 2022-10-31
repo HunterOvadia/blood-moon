@@ -16,8 +16,19 @@ class BLOODMOON_API UHoveredInteractableWidget : public UUserWidget
 
 public:
 	void OnHoveredNewInteractable(AInteractableActor* NewInteractable);
+
+protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+private:
+	void UpdateText();
 	
 protected:
+	UPROPERTY()
+	AInteractableActor* CurrentInteractableActor;
+
+	uint8 PreviousState;
+	
 	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	UTextBlock* InteractableNameText;
 };

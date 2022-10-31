@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "InteractableActor.h"
-#include "GameFramework/Actor.h"
 #include "InteractableDoor.generated.h"
 
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
@@ -24,10 +23,11 @@ class BLOODMOON_API AInteractableDoor : public AInteractableActor
 
 public:
 	AInteractableDoor();
+	virtual FText GetCurrentActionText() const override;
 	virtual void OnInteract(AActor* Interactee) override;
-
+	virtual uint8 GetCurrentState() const override;
+	
 protected:
-	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	bool IsLocked() const;

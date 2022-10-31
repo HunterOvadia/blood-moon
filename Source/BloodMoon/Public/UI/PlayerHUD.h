@@ -2,13 +2,14 @@
 
 #pragma once
 #include "CoreMinimal.h"
+#include "HoveredInteractableWidget.h"
+#include "PlayerInformationWidget.h"
 #include "GameFramework/HUD.h"
 #include "UObject/Object.h"
 #include "PlayerHUD.generated.h"
 
 class AInteractableActor;
-class UPlayerInformationWidget;
-class UHoveredInteractableWidget;
+
 
 UCLASS()
 class BLOODMOON_API APlayerHUD : public AHUD
@@ -16,7 +17,7 @@ class BLOODMOON_API APlayerHUD : public AHUD
 	GENERATED_BODY()
 
 public:
-	void OnHoveredNewInteractable(AInteractableActor* NewInteractable);
+	void OnHoveredNewInteractable(AInteractableActor* NewInteractable) const;
 	
 protected:
 	virtual void BeginPlay() override;

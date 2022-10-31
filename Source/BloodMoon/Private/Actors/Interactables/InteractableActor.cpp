@@ -9,10 +9,6 @@ AInteractableActor::AInteractableActor()
 	
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	SetRootComponent(StaticMeshComponent);
-}
 
-void AInteractableActor::OnInteract(AActor* Interactee)
-{
-	OnInteractBP(Interactee);
+	DisplayName = FText::FromString(TEXT("Default Interactable"));
 }
-

@@ -15,13 +15,15 @@ public:
 	AInteractableActor();
 
 public:
-	virtual void OnInteract(AActor* Interactee);
+	virtual uint8 GetCurrentState() const PURE_VIRTUAL(AInteractableActor::GetCurrentState, return 0;);
+	virtual FText GetCurrentActionText() const PURE_VIRTUAL(AInteractableActor::GetCurrentActionText, return FText(););
+	virtual void OnInteract(AActor* Interactee) PURE_VIRTUAL(AInteractableActor::GetCurrentActionText, );
+	const FText& GetDisplayName() const { return DisplayName; }
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnInteractBP(AActor* Interactee);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Interactable)
+	FText DisplayName;
 	
-protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Interactable)
 	UStaticMeshComponent* StaticMeshComponent;
 };

@@ -13,10 +13,28 @@ AInteractableDoor::AInteractableDoor()
 	ClosedAngle = 0.0f;
 }
 
+FText AInteractableDoor::GetCurrentActionText() const
+{
+	if(IsClosed())
+	{
+		if(IsLocked())
+		{
+			return FText::FromString(TEXT("Unlock"));
+		}
+
+		return FText::FromString(TEXT("Open"));
+	}
+
+	if(IsOpen())
+	{
+		return FText::FromString(TEXT("Close"));
+	}
+
+	return FText();
+}
+
 void AInteractableDoor::OnInteract(AActor* Interactee)
 {
-	Super::OnInteract(Interactee);
-
 	if(IsClosed())
 	{
 		if(IsLocked())
@@ -32,12 +50,9 @@ void AInteractableDoor::OnInteract(AActor* Interactee)
 	}
 }
 
-void AInteractableDoor::BeginPlay()
+uint8 AInteractableDoor::GetCurrentState() const
 {
-	Super::BeginPlay();
-
-	// TODO(HO): Random Open/Closed State
-	// TODO(HO): If Closed, Random Lock?
+	return DoorState;
 }
 
 void AInteractableDoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
